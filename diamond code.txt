@@ -1,0 +1,58 @@
+
+// Pin definitions
+const int irSensorPin = 2;  // IR sensor is connected to pin D2
+const int photoDiodePin = A0; // Photodiode is connected to pin A0
+const int pirSensorPin = 3;  // PIR sensor is connected to pin D3
+const int thresholdLight = 930;  // Light threshold for the photodiode (adjust as needed)
+
+void setup() {
+  // Start serial communication for debugging
+  Serial.begin(9600);
+  
+  // Initialize sensor pins
+  pinMode(irSensorPin, INPUT);     // IR sensor as input
+  pinMode(pirSensorPin, INPUT);    // PIR sensor as input
+  
+  pinMode(13, OUTPUT);  // LED for Light Sensor
+  pinMode(12, OUTPUT);  // LED for IR Sensor
+  pinMode(11, OUTPUT);  // LED for PIR Sensor
+  
+  // Wait for a few seconds to stabilize sensors
+  delay(2000);
+}
+
+void loop() {
+  // Read values from sensors
+  int irValue = digitalRead(irSensorPin);  // 0 or 1 based on IR detection
+  int lightValue = analogRead(photoDiodePin);  // Read the light value (0 to 1023)
+  int pirValue = digitalRead(pirSensorPin);  // 0 or 1 based on motion detection
+
+  // Debugging: Print values to Serial Monitor
+  Serial.print("IR: "); Serial.print(irValue);
+  Serial.print(" | Light: "); Serial.print(lightValue);
+  Serial.print(" | PIR: "); Serial.println(pirValue);
+
+  // IR Sensor Detection Logic
+  if (irValue == LOW) {
+    digitalWrite(12, HIGH);
+  } else {
+    digitalWrite(12, LOW); // Turn off if no detection
+  }
+
+  // Light Sensor Logic
+  if (lightValue < thresholdLight) {
+    digitalWrite(13, HIGH);
+  } else {
+    digitalWrite(13, LOW); // Turn off when it's bright
+  }
+
+  // PIR Sensor Detection Logic
+  if (pirValue == HIGH) {
+    digitalWrite(11, HIGH);
+  } else {
+    digitalWrite(11, LOW); // Turn off if no motion
+  }
+
+  delay(500); // Small delay to avoid excessive serial printing
+}
+

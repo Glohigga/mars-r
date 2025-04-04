@@ -1,0 +1,56 @@
+// Sensor & Button Pins
+const int flexPin = A0;       // Flex Sensor (Finger Bending)
+const int ldrPin = A1;        // Photoresistor (Light Sensor)
+const int buttonPin = 2;      // Push Button (Mode Toggle)
+const int ledPin = 9;         // LED Output
+
+// Variables
+int mode = 1;  // Mode 1: LED Brightness Control, Mode 2: Light ON/OFF
+bool buttonPressed = false;  // Debounce prevention
+
+void setup() {
+    pinMode(buttonPin, INPUT_PULLUP);  // Internal Pull-up Resistor for button
+    pinMode(ledPin, OUTPUT);
+    Serial.begin(9600);  // Start Serial Monitor
+}
+
+void loop() {
+    int flexValue = analogRead(flexPin);  // Read Flex Sensor
+    int lightValue = analogRead(ldrPin);  // Read LDR
+    int buttonState = digitalRead(buttonPin);
+
+    // **Mode Switching with Push Button**
+    if (buttonState == LOW && !buttonPressed) {
+        mode = (mode == 1) ? 2 : 1;  // Toggle between Mode 1 & 2
+        Serial.print("Switched to Mode: "); Serial.println(mode);
+        buttonPressed = true;
+        delay(300);  // Debounce delay
+    }
+    if (buttonState == HIGH) {
+        buttonPressed = false;
+    }
+
+    // **Debugging: Print sensor values in Serial Monitor**
+    Serial.print("Mode: "); Serial.print(mode);
+    Serial.print(" | Flex: "); Serial.print(flexValue);
+    Serial.print(" | Light: "); Serial.println(lightValue);
+
+    // **MODE 1: FLEX SENSOR CONTROLS LED BRIGHTNESS**
+    if (mode == 1) {
+        int ledBrightness = map(flexValue, 200, 600, 0, 255);  // Adjusting range
+        ledBrightness = constrain(ledBrightness, 0, 255);  // Ensure brightness stays within limits
+        analogWrite(ledPin, ledBrightness);
+        Serial.print("LED Brightness: "); Serial.println(ledBrightness);
+    }
+
+    // **MODE 2: LDR CONTROLS LED ON/OFF**
+    else if (mode == 2) {
+        if (lightValue < 500) {  // If dark, turn LED ON
+            digitalWrite(ledPin, HIGH);
+        } else {
+            digitalWrite(ledPin, LOW);
+        }
+    }
+
+    delay(100);
+}

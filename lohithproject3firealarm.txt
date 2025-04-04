@@ -1,0 +1,45 @@
+// Pin Definitions
+const int tempPin = A0;    // Temperature Sensor (TMP36)
+const int gasPin = A1;     // Gas Sensor (MQ-2)
+const int redLED = 7;      // Red LED for fire alert
+const int greenLED = 8;    // Green LED for safe status
+
+// Fire Detection Thresholds
+const float tempThreshold = 50.0;  // Fire detected above 50°C
+const int gasThreshold = 300;      // Gas sensor detection level
+
+void setup() {
+    Serial.begin(9600); 
+    pinMode(tempPin, INPUT);
+    pinMode(gasPin, INPUT);
+    pinMode(redLED, OUTPUT);
+    pinMode(greenLED, OUTPUT);
+}
+
+void loop() {
+    // Read Temperature Sensor (TMP36)
+    int tempValue = analogRead(tempPin);
+    float voltage = tempValue * 5.0 / 1024.0;
+    float temperature = (voltage - 0.5) * 100.0;
+
+    // Read Gas Sensor (MQ-2)
+    int gasValue = analogRead(gasPin);
+
+    Serial.print("Temperature: ");
+    Serial.print(temperature);
+    Serial.print("°C | Gas Level: ");
+    Serial.println(gasValue);
+
+    // Fire Detection Logic
+    if (temperature > tempThreshold || gasValue > gasThreshold) {
+        digitalWrite(redLED, HIGH);
+        digitalWrite(greenLED, LOW);
+        Serial.println("🔥 Fire/Gas Detected! 🔥");
+    } else {
+        digitalWrite(redLED, LOW);
+        digitalWrite(greenLED, HIGH);
+        Serial.println("✅ Safe Environment.");
+    }
+
+    delay(1000); // Wait 1 second before next reading
+}
